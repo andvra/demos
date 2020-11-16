@@ -1,0 +1,11 @@
+{
+  "name": "file_upload",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "^4.17.1",
+    "express-fileupload": "^1.2.0",
+    "ffmpeg": "0.0.4",
+    "microsoft-cognitiveservices-speech-sdk": "^1.14.0",
+    "uuid": "^8.3.1"
+  }
+}
