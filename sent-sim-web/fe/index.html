@@ -1,0 +1,52 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Raleway" />
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        function setResultText(textCustomer, textSupport) {
+            $("#result-customer").text(textCustomer);
+            $("#result-support").text(textSupport);
+        }
+        function getSimilar(query) {
+            $.ajax({
+                type: 'POST',
+                url: '/query',
+                contentType: "application/json",
+                data: JSON.stringify({ "query": query }),
+                success: function (data, status, hqXHR) {
+                    setResultText(data["customer"], data["support"]);
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR, textStatus, errorThrown);
+                }
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <div id="header">
+        Text similarity
+    </div>
+    <div id="search">
+        <input id="query" type="text" />
+        <div class="break"></div>
+        <div id="result">
+            <div id="result-customer"></div>
+            <div id="result-support"></div>
+        </div>
+    </div>
+    <script>
+        $("#query").on('keypress', function (e) {
+            if (e.which == 13) {
+                query = $("#query").val();
+                $("#query").blur();
+                getSimilar(query);
+            }
+        });
+    </script>
+</body>
+
+</html>

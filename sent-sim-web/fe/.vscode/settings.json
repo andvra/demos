@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/d8d1be2a-09ef-47da-acdf-21fea4b6da9a/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/textsimdemo",
+    "appService.deploySubpath": "."
+}
