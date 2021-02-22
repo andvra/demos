@@ -3,22 +3,48 @@
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Raleway" />
-    <link rel="stylesheet" href="css/styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
     <script>
-        function setResultText(textCustomer, textSupport) {
-            $("#result-customer").text(textCustomer);
-            $("#result-support").text(textSupport);
+        function setResultTexts(data) {
+            $("#results").empty();
+            let ref = null;
+            data.forEach(function(v, idx) {
+                textCustomer = v["customer"];
+                textSupport = v["support"];
+                const divCustomerText = $("<div></div>").addClass("result-customer").text(textCustomer);
+                const divSupportText = $("<div></div>").addClass("result-support").addClass("collapsed").text(textSupport);
+                const divExpand = $("<img src='images/arrow-right.svg'>").addClass("result-customer-arrow");
+                const divCustomerBlock = $("<div></div>").addClass("result-customer-block");
+                const divResult = $("<div></div>").addClass("result");
+
+                divCustomerBlock.click(x => {
+                    if (divSupportText.hasClass("collapsed")) {
+                        divExpand.text("<");
+                    } else {
+                        divExpand.text(">");
+                    }
+                    divSupportText.toggleClass("collapsed");
+                    divExpand.toggleClass("rotate90");
+                });
+                divCustomerBlock.append(divCustomerText, divExpand);
+                divResult.append(divCustomerBlock, divSupportText);
+                $("#results").append(divResult);
+            });
         }
+
         function getSimilar(query) {
             $.ajax({
                 type: 'POST',
                 url: '/query',
                 contentType: "application/json",
-                data: JSON.stringify({ "query": query }),
-                success: function (data, status, hqXHR) {
-                    setResultText(data["customer"], data["support"]);
+                data: JSON.stringify({
+                    "query": query
+                }),
+                success: function(data, status, hqXHR) {
+                    setResultTexts(data);
                 },
-                error: function (jqXHR, textStatus, errorThrown) {
+                error: function(jqXHR, textStatus, errorThrown) {
                     console.log(jqXHR, textStatus, errorThrown);
                 }
             });
@@ -27,19 +53,29 @@
 </head>
 
 <body>
-    <div id="header">
-        Text similarity
-    </div>
-    <div id="search">
-        <input id="query" type="text" />
-        <div class="break"></div>
-        <div id="result">
-            <div id="result-customer"></div>
-            <div id="result-support"></div>
+    <div id="container">
+        <div id="header">
+            Get the answer to your questions
+        </div>
+        <div id="info">
+            Search in any language and get the closest matching answer. Based on a text similarity model and a customer support dataset. Lorem ipsum dolor set amet.
+        </div>
+        <div id="search">
+            <div id="search-bar">
+                <input id="query" type="text" placeholder="Ask a question here" />
+                <div id="query-icon"><span class="material-icons magnify-icon">search</span></div>
+            </div>
+            <div class="break"></div>
+            <div id="results">
+            </div>
+        </div>
+        <div id="footer">
+            <button id="learn">Learn more how this was done</button>
+            <div id="powered">Powered by <img id="logo" src="images/peltarion_logotype_horizontal_black.png" /></div>
         </div>
     </div>
     <script>
-        $("#query").on('keypress', function (e) {
+        $("#query").on('keypress', function(e) {
             if (e.which == 13) {
                 query = $("#query").val();
                 $("#query").blur();
@@ -47,6 +83,7 @@
             }
         });
     </script>
+
 </body>
 
 </html>

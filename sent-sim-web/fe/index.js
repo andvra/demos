@@ -58,7 +58,7 @@ function getSimilar(query, res) {
     const url = 'https://a.azure-eu-west.platform.peltarion.com/deployment/6b4af091-e459-4dfb-b6a5-d9a93aa73b5b/forward';
     const token = '5a7e548f-180e-4aeb-b683-327be197ca39';
     const data = { "rows": [{ "text_customer": query }] };
-
+    const numReturned = 3;
     (async () => {
         const rawResponse = await fetch(url, {
             method: 'POST',
@@ -75,9 +75,12 @@ function getSimilar(query, res) {
         const queryEmbeddingLen = getVectorLength(retEmbedding);
         var embeddingsQuery = nj.array(retEmbedding);
         var m = nj.divide(nj.dot(embeddingsLibraryEmbeddings, embeddingsQuery.T), embeddingsLibraryLengths);
-        const maxObj = nargmax(m, 5);
+        const maxObj = nargmax(m, numReturned);
         const normalizedDist = maxObj.map(x => m.get(x["idx"]) / queryEmbeddingLen);
-        res.send({ "customer": embeddingsLibraryAll[maxObj[0]["idx"]]["text_customer"], "support": embeddingsLibraryAll[maxObj[0]["idx"]]["text_support"] });
+        const ret = maxObj.map(x => {
+            return { "customer": embeddingsLibraryAll[x["idx"]]["text_customer"], "support": embeddingsLibraryAll[x["idx"]]["text_support"] };
+        });
+        res.send(ret);
     })();
 }
 
