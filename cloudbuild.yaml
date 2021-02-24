@@ -1,0 +1,22 @@
+# Cloud Build docs: https://peltarion.atlassian.net/wiki/x/DwBpDQ
+steps:
+  - name: alpine
+    args: ['echo', 'COMMIT_SHA="$COMMIT_SHA" TAG_NAME="$TAG_NAME" BUILD_ID="$BUILD_ID"']
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - 'build'
+      - '-t'
+      - 'eu.gcr.io/builddeploy-810532/twittercs-demo:$COMMIT_SHA'
+      - '--label'
+      - 'GitDescription=$COMMIT_SHA'
+      - '--label'
+      - 'GitHash=$COMMIT_SHA'
+      - '--label'
+      - 'GitRepository=$REPO_NAME'
+      - '--label'
+      - 'GitBranch=$BRANCH_NAME'
+      - 'sent-sim-web/fe/'
+
+images:
+  - 'eu.gcr.io/builddeploy-810532/twittercs-demo:$COMMIT_SHA'
+timeout: 600s
