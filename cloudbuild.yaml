@@ -2,11 +2,16 @@
 steps:
   - name: alpine
     args: ['echo', 'COMMIT_SHA="$COMMIT_SHA" TAG_NAME="$TAG_NAME" BUILD_ID="$BUILD_ID"']
+  - name: gcr.io/cloud-builders/gsutil
+    args:
+      - cp
+      - gs://twittercs-demo-assets.demo.peltarion.com/embeddings.json
+      - sent-sim-web/fe/assets/json/embeddings.json
   - name: gcr.io/cloud-builders/docker
     args:
       - 'build'
       - '-t'
-      - 'eu.gcr.io/builddeploy-810532/twittercs-demo:$COMMIT_SHA'
+      - 'eu.gcr.io/$PROJECT_ID/twittercs-demo:$COMMIT_SHA'
       - '--label'
       - 'GitDescription=$COMMIT_SHA'
       - '--label'
@@ -16,7 +21,17 @@ steps:
       - '--label'
       - 'GitBranch=$BRANCH_NAME'
       - 'sent-sim-web/fe/'
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - 'push'
+      - 'eu.gcr.io/$PROJECT_ID/twittercs-demo:$COMMIT_SHA'
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['beta', 'run', 'deploy', 'twittercs-demo',
+           '--image', 'eu.gcr.io/$PROJECT_ID/twittercs-demo:$COMMIT_SHA',
+           '--region', 'europe-west1','--platform','managed',
+           '--concurrency','80',
+           '--memory', '2G',
+           '--max-instances','2',
+           '--allow-unauthenticated']
 
-images:
-  - 'eu.gcr.io/builddeploy-810532/twittercs-demo:$COMMIT_SHA'
 timeout: 600s
