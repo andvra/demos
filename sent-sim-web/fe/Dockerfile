@@ -9,12 +9,6 @@ FROM node:15.9.0-alpine3.10 AS build
 # Set working directory
 WORKDIR /builddir
 
-# Install Python/pip and make
-ENV PYTHONUNBUFFERED=1
-RUN apk add --update --no-cache python3 make cmake build-base && ln -sf python3 /usr/bin/python
-RUN python3 -m ensurepip
-RUN pip3 install --no-cache --upgrade pip setuptools
-
 # Copy files from local computer to Docker image
 COPY ./assets /builddir/assets/
 COPY package.json package-lock.json index.html index.js /builddir/
