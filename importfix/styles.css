@@ -1,0 +1,36 @@
+body {
+    background-color: #f8fbfe;
+}
+
+.button {
+    background-color: whitesmoke;
+}
+
+.button-selected {
+    background-color: lightskyblue;
+}
+
+.button-select {
+    background-color: #e0f4f2;
+}
+
+.button-download {
+    background-color: #00a796;
+    margin-top: 100px;
+}
+
+.section {
+    margin: 20px 0 0 0;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.custom-file-upload {
+    background-color: #00a796;
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+}

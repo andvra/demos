@@ -14,6 +14,7 @@
 
             $('#file-upload').on("change", function () {
                 const fn = $("#file-upload").val();
+                // Regexp to extract the filename from the path
                 const filename = fn.match(/[^\\/]*$/)[0];
                 $("#filename").text(filename);
                 sendFile();
@@ -48,11 +49,38 @@
                             $("#result").text(data.text);
                         }
                         if (data.done) {
-                            // TODO: Flag done?
+                            // TODO: Stop progress animation?
                         }
                         done = data.done;
                     });
                 }
+            }
+
+            function getSentiment(msg) {
+                const url = "https://a.azure-eu-west.platform.peltarion.com/deployment/117223b6-b7e4-46ce-a15e-5d305963e36c/forward";
+                const token = "a7dcb4bb-b1fa-4538-b8b8-1cd779bc72a2";
+                const json = { rows: [{ review: msg }] };
+                $.ajax({
+                    type: "POST",
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    url: url,
+                    headers:
+                        { Authorization: 'Bearer ' + token }
+                    ,
+                    data: JSON.stringify(json),
+                    success: function (data) {
+                        const threshold = 0.6;// Taken from the Peltarion platform
+                        const key = "sentiment";
+                        const val = data["rows"][0][key];
+                        const label = val > threshold ? "positive" : "negative";
+                        $("#result-sentiment").text(`${label}: ${val}`);
+                    },
+                    error: function (e) {
+                        $("#result-sentiment").text(e.responseText);
+                        console.log("ERROR: ", e);
+                    }
+                });
             }
 
             function sendFile() {
@@ -73,7 +101,7 @@
                     timeout: 600000,
                     success: function (data) {
                         uuid = data;
-                        $("#result").text("Processing..");
+                        // TODO: Show progress animation?
                         fetchDataStream();
                     },
                     error: function (e) {
@@ -82,7 +110,31 @@
                     }
                 });
             }
+
+            function getEnv() {
+                $.ajax({
+                    type: "GET",
+                    url: "/env",
+                    success: function (data) {
+                        $("#result-env").text(data);
+                    },
+                    error: function (e) {
+                        $("#result-env").text(e.responseText);
+                        console.log("ERROR: ", e);
+                    }
+                });
+            }
+
+            $("#getsentiment")[0].addEventListener('click', function () {
+                const text = $("#result").val();
+                getSentiment(text);
+            });
+
+            $("#getenv")[0].addEventListener('click', function () {
+                getEnv();
+            });
         });
+
     </script>
     <script>
         const sdk = window.SpeechSDK;
@@ -110,7 +162,7 @@
 
 <body>
     <div class="page">
-        <form id="uploadForm" method="post" encType="multipart/form-data">
+        <!-- <form id="uploadForm" method="post" encType="multipart/form-data">
 
             <label for="language">Choose a language:</label>
 
@@ -209,9 +261,13 @@
                     <div id="filename" style="float:left;top:50%;transform:translateY(25%);margin-left:10px;"></div>
                 </div>
             </div>
-        </form>
+        </form> -->
 
-        <textarea id="result" placeholder="Upload file to get started" disabled style="resize: none;"></textarea>
+        <textarea id="result" placeholder="Enter text" style="resize: none;"></textarea>
+        <textarea id="result-sentiment" placeholder="Sentiment" disabled style="resize: none;"></textarea>
+        <button id="getsentiment">Get sentiment</button>
+        <!-- <button id="getenv">Get env</button>
+        <textarea id="result-env" placeholder="Upload file to get started" style="resize: none;"></textarea> -->
     </div>
 </body>
 

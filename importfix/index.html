@@ -1,0 +1,176 @@
+<html>
+
+<head>
+    <script type="text/javascript" src="papaparse.min.js"></script>
+    <script type="text/javascript" src="engine.js"></script>
+    <script type="text/javascript" src="xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        const importFix = new ImportFix();
+        let firstRowIsHeaders = true;
+        function getRandomInt(max) {
+            return Math.floor(Math.random() * Math.floor(max));
+        }
+
+
+        function displayHeaders() {
+            const el = document.getElementById("headers");
+            if (firstRowIsHeaders) {
+                const headersStr = importFix.uploadedData[0].join('<br/>');
+                el.innerHTML = headersStr;
+            } else {
+                el.innerHTML = '';
+            }
+        }
+
+        function displayExampleRow(chosenIdx = 0) {
+            const el = document.getElementById("removed-row-example");
+            if (importFix.info.numRowsRemoved > 0) {
+                const removedIndices = importFix.getIndicesToRemove();
+                const cntInvalidRows = removedIndices.filter(x => x.errType === importFix.ErrorTypes.emptyCell).length;
+                const strNext = cntInvalidRows > 1 ? '<a href="#" onclick="displayExampleRow(' + ((chosenIdx + 1) % cntInvalidRows).toString() + ');return false;">Next</a>' : '';
+                const rowIdx = removedIndices[chosenIdx].rowIdx;
+                let removedRowStr = 'Row #' + rowIdx + ' - blank value(s))</b>&nbsp;' + strNext + '</br><br/>&nbsp;&nbsp;';
+
+                let a = [];
+                if (firstRowIsHeaders) {
+                    a = importFix.uploadedData[0];
+                } else {
+                    a = [...Array(importFix.uploadedData[0].length).keys()];
+                }
+                const c = a.map(function (e, i) {
+                    return "<b>" + e + "</b>: " + importFix.uploadedData[rowIdx][i];
+                });
+                removedRowStr += c.join('<br/>&nbsp;&nbsp;');
+                el.innerHTML = removedRowStr;
+            } else {
+                el.innerHTML = '';
+            }
+        }
+
+        function displayResults() {
+            const elInfo = document.getElementById("info");
+            const elAllInfo = document.getElementById("overall-info");
+            const elResults = document.getElementById("results");
+            let infoStr = '<h2>Info</h2><br/>';
+            infoStr += `&nbsp;&nbsp;Number of rows in original file: ${importFix.info.numRowsOriginal}<br/>&nbsp;&nbsp;Number of rows after clean: ${importFix.info.numRowsAfterClean}<br/>&nbsp;&nbsp;Number of empty rows: ${importFix.info.numRowsRemoved}<br/>&nbsp;&nbsp;Number of features: ${importFix.info.numFeatures}<br/>`;
+
+            displayHeaders();
+            displayExampleRow();
+
+            elAllInfo.innerHTML = infoStr;
+            elInfo.style.display = "block";
+        }
+
+        function hideResults() {
+            const elInfo = document.getElementById("info");
+            elInfo.style.display = "none";
+        }
+
+        function download() {
+            importFix.downloadCSV()
+        }
+
+        function renderSheetNames(file, sheetNames) {
+            const elRoot = document.getElementById("sheet-select");
+            sheetNames.forEach(sheetName => {
+                const btn = document.createElement('button');
+                btn.classList.add("button-select");
+                btn.innerHTML = sheetName;
+                elRoot.appendChild(btn);
+                btn.addEventListener("click", function () {
+                    importFix.readContentExcelSheet(file, sheetName, displayResults);
+                });
+            });
+        }
+
+        function handleSheetNames(file, sheetNames) {
+            if (sheetNames) {
+                if (sheetNames.length === 1) {
+                    importFix.readContentExcelSheet(file, sheetNames[0], displayResults);
+                } else {
+                    renderSheetNames(file, sheetNames);
+                }
+            }
+        }
+
+        function upload(files) {
+            hideResults();
+            if (files.length === 1) {
+                const file = files[0];
+                if (importFix.fileIsCsv(file)) {
+                    importFix.readContentCSVFile(file, displayResults);
+                } else if (importFix.fileIsExcel(file)) {
+                    importFix.readSheetNames(file, handleSheetNames);
+                }
+            } else if (files.length > 1) {
+                importFix.warningLog("Multiple files selected");
+            } else {
+                importFix.warningLog("No file selected");
+            }
+        }
+
+        function toggleHeader() {
+            const el = document.getElementById("toggle-header");
+            firstRowIsHeaders = !firstRowIsHeaders;
+            el.classList.remove("button-selected");
+            if (firstRowIsHeaders) {
+                el.classList.add("button-selected");
+            }
+            displayResults();
+        }
+
+        function toggleDisplay(ids) {
+            if (!Array.isArray(ids)) {
+                ids = [ids];
+            }
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (el.style.display === "") {
+                    el.style.display = "none";
+                } else {
+                    el.style.display = "";
+                }
+            });
+        }
+
+    </script>
+</head>
+
+<body>
+    <label for="file-upload" class="custom-file-upload">
+        Upload CSV / Excel
+    </label>
+    <input id="file-upload" type="file" />
+    <div id="sheet-select">
+
+    </div>
+    <div id="info" style="display: none;" class="section">
+        <div id="results">
+            <div id="overall-info"></div>
+            <div id="header-headers">
+                <h2 onclick="toggleDisplay(['headers','toggle-header']);">Headers</h2>
+                <button id="toggle-header" onclick="toggleHeader()" class="button button-selected"
+                    style="display: none;">
+                    First row is header
+                </button>
+                <div id="headers" style="display: none;"></div>
+            </div>
+            <div id="header-removed-row-example">
+                <h2 onclick="toggleDisplay('removed-row-example');">Removed row example</h2>
+                <div id="removed-row-example" style="display: none;"></div>
+            </div>
+        </div>
+        <button id="download" onclick="download()" class="button-download">Download</button>
+
+    </div>
+    <script>
+        const inputElement = document.getElementById("file-upload");
+        inputElement.addEventListener("change", handleFiles, false);
+        function handleFiles() {
+            upload(this.files);
+        }
+    </script>
+</body>
+
+</html>
