@@ -2,9 +2,10 @@ class ImportFix {
 
     ErrorTypes = Object.freeze({ "emptyCell": 1, "other": 2 });
 
-    constructor() {
+    constructor(numRowsToRead = 100000) {
         this.uploadedData = [];
         this.info = {}
+        this.numRowsToRead = numRowsToRead;
     }
 
     addUploadedDataRow(row) {
@@ -121,6 +122,7 @@ class ImportFix {
 
     resetResult() {
         this.uploadedData = [];
+
     }
 
     readContentCSVData(data, callbackFn) {
@@ -128,7 +130,7 @@ class ImportFix {
         const readData = Papa.parse(data, {
             header: false,  // Deactivate since we want to control this ourselves
             skipEmptyLines: false,
-            preview: 100000 // Maximum number of lines to read. This includeds the header, if any
+            preview: self.numRowsToRead // Maximum number of lines to read. This includeds the header, if any
         });
         readData.data.forEach(x => this.addUploadedDataRow(x));
         this.doneReadingData(callbackFn);
@@ -141,7 +143,7 @@ class ImportFix {
             worker: true,
             header: false,  // Deactivate since we want to control this ourselves
             skipEmptyLines: false,
-            preview: 100000, // Maximum number of lines to read. This includes the header, if any
+            preview: self.numRowsToRead, // Maximum number of lines to read. This includes the header, if any
             step: function (row) {
                 self.addUploadedDataRow(row.data);
             },
@@ -152,6 +154,27 @@ class ImportFix {
         });
     }
 
+    updateRange(sheet, sheetJsRange) {
+        sheet['!ref'] = sheetJsRange;
+    }
+
+    getRangeNoBlank(sheet) {
+        const range = XLSX.utils.decode_range(sheet['!ref']);
+        const columnCount = range.e.c + 1
+
+        // Loop through the range and make sure all columns headers are set.
+        // TODO: What happens when the first row is data and not headers,
+        //  and there is a blank value? What we want is to just skip this line.
+        //  It shouldn't affect the number of columns read for later rows.
+        for (let i = 0; i < columnCount; ++i) {
+            if (sheet[`${XLSX.utils.encode_col(i)}1`] === undefined) {
+                range.e.c = i - 1;
+                break;
+            }
+        }
+        return XLSX.utils.encode_range(range);
+    }
+
     readContentExcelSheet(file, sheetName, callbackFn) {
         const self = this;
         var reader = new FileReader();
@@ -159,6 +182,8 @@ class ImportFix {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array', sheets: [sheetName] });
             const sheet = workbook.Sheets[sheetName];
+            const range = self.getRangeNoBlank(sheet);
+            self.updateRange(sheet, range);
             const csv = XLSX.utils.sheet_to_csv(sheet);
             self.readContentCSVData(csv, callbackFn);
         };
@@ -167,7 +192,6 @@ class ImportFix {
     }
 
     readSheetNames(file, callbackFn) {
-        const self = this;
         var reader = new FileReader();
         reader.onload = function (e) {
             var data = new Uint8Array(e.target.result);
@@ -197,27 +221,4 @@ class ImportFix {
         return this.fileIsOfType(file, ["csv"]);
     }
 
-    // readContent(file, callbackFn) {
-    //     this.uploadedData = [];
-    //     switch (this.getFileExtension(file)) {
-    //         case "csv": return this.readContentCSVFile(file, callbackFn);
-    //         case "xls": return this.readContentExcel(file, callbackFn);
-    //         case "xlsx": return this.readContentExcel(file, callbackFn);
-    //         default: return null;
-    //     }
-    // }
-
-    // upload(file, callbackFn) {
-    //     this.infoLog("Start upload");
-
-    //     if (files.length === 1) {
-    //         // Get the first file
-    //         this.readContent(files[0], callbackFn);
-    //     } else if (files.length > 1) {
-    //         this.warningLog("Multiple files selected");
-    //     } else {
-    //         this.warningLog("No file selected");
-    //     }
-
-    // }
 }

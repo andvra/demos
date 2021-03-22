@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet'>
     <script type="text/javascript" src="papaparse.min.js"></script>
     <script type="text/javascript" src="engine.js"></script>
     <script type="text/javascript" src="xlsx.full.min.js"></script>
@@ -8,67 +9,109 @@
     <script>
         const importFix = new ImportFix();
         let firstRowIsHeaders = true;
+        let displayExampleRowIdx = 0;
+
         function getRandomInt(max) {
             return Math.floor(Math.random() * Math.floor(max));
         }
 
-
         function displayHeaders() {
-            const el = document.getElementById("headers");
-            if (firstRowIsHeaders) {
-                const headersStr = importFix.uploadedData[0].join('<br/>');
-                el.innerHTML = headersStr;
-            } else {
-                el.innerHTML = '';
+            const headers = importFix.uploadedData[0];
+
+            const el = document.getElementById("header-list");
+            for (let i = 0; i < headers.length; i++) {
+                const row = document.createElement('div');
+                row.classList.add("flex-row");
+                row.classList.add("header-row");
+                const col = document.createElement("div");
+                col.classList.add("flex-col-full");
+                col.innerHTML = headers[i];
+                row.appendChild(col);
+                el.appendChild(row);
             }
         }
 
-        function displayExampleRow(chosenIdx = 0) {
-            const el = document.getElementById("removed-row-example");
+        function displayExampleRow(nextRowDiff = 0) {
+            const el = document.getElementById("example-row-table");
+            const elRemove = document.getElementsByClassName("example-row");
+
+            for (let i = elRemove.length - 1; i >= 0; i--) {
+                elRemove[i].remove();
+            }
+
+
             if (importFix.info.numRowsRemoved > 0) {
+                const elRemoveHeader = document.getElementById("example-row-header");
                 const removedIndices = importFix.getIndicesToRemove();
                 const cntInvalidRows = removedIndices.filter(x => x.errType === importFix.ErrorTypes.emptyCell).length;
-                const strNext = cntInvalidRows > 1 ? '<a href="#" onclick="displayExampleRow(' + ((chosenIdx + 1) % cntInvalidRows).toString() + ');return false;">Next</a>' : '';
-                const rowIdx = removedIndices[chosenIdx].rowIdx;
-                let removedRowStr = 'Row #' + rowIdx + ' - blank value(s))</b>&nbsp;' + strNext + '</br><br/>&nbsp;&nbsp;';
+                // Keep value positive an within range
+                displayExampleRowIdx = (displayExampleRowIdx + nextRowDiff + cntInvalidRows) % cntInvalidRows;
+                const rowIdx = removedIndices[displayExampleRowIdx].rowIdx;
+                let removedRowStr = 'Example of removed row: Row #' + rowIdx + ' - blank value(s)';
+                elRemoveHeader.innerHTML = removedRowStr;
 
-                let a = [];
+                let keys = [];
                 if (firstRowIsHeaders) {
-                    a = importFix.uploadedData[0];
+                    keys = importFix.uploadedData[0];
                 } else {
-                    a = [...Array(importFix.uploadedData[0].length).keys()];
+                    keys = [...Array(importFix.uploadedData[0].length).keys()];
                 }
-                const c = a.map(function (e, i) {
-                    return "<b>" + e + "</b>: " + importFix.uploadedData[rowIdx][i];
-                });
-                removedRowStr += c.join('<br/>&nbsp;&nbsp;');
-                el.innerHTML = removedRowStr;
-            } else {
-                el.innerHTML = '';
+
+                for (let i = 0; i < keys.length; i++) {
+                    const row = document.createElement('div');
+                    row.classList.add("flex-row");
+                    row.classList.add("example-row");
+                    const colKey = document.createElement("div");
+                    colKey.innerHTML = keys[i];
+                    colKey.classList.add("flex-col");
+                    const colValue = document.createElement("div");
+                    colValue.innerHTML = importFix.uploadedData[rowIdx][i];
+                    colValue.classList.add("flex-col");
+                    row.appendChild(colKey);
+                    row.appendChild(colValue);
+                    el.appendChild(row);
+                    console.log(keys[i]);
+                }
             }
+        }
+
+        function displayInfo() {
+            const el = document.getElementById("info");
+            const infoStr = `&nbsp;&nbsp;Number of rows in original file: ${importFix.info.numRowsOriginal}<br/>&nbsp;&nbsp;Number of rows after clean: ${importFix.info.numRowsAfterClean}<br/>&nbsp;&nbsp;Number of empty rows: ${importFix.info.numRowsRemoved}<br/>&nbsp;&nbsp;Number of features: ${importFix.info.numFeatures}<br/>`;
+            el.innerHTML = infoStr;
         }
 
         function displayResults() {
-            const elInfo = document.getElementById("info");
-            const elAllInfo = document.getElementById("overall-info");
-            const elResults = document.getElementById("results");
-            let infoStr = '<h2>Info</h2><br/>';
-            infoStr += `&nbsp;&nbsp;Number of rows in original file: ${importFix.info.numRowsOriginal}<br/>&nbsp;&nbsp;Number of rows after clean: ${importFix.info.numRowsAfterClean}<br/>&nbsp;&nbsp;Number of empty rows: ${importFix.info.numRowsRemoved}<br/>&nbsp;&nbsp;Number of features: ${importFix.info.numFeatures}<br/>`;
 
+            displayInfo();
             displayHeaders();
             displayExampleRow();
+        }
 
-            elAllInfo.innerHTML = infoStr;
-            elInfo.style.display = "block";
+        function callbackGotResults() {
+            displayResults();
+            enableDownload();
         }
 
         function hideResults() {
-            const elInfo = document.getElementById("info");
-            elInfo.style.display = "none";
+            // const elInfo = document.getElementById("info");
+            // elInfo.style.display = "none";
+
+            // TODO: Implement
         }
 
+        function enableDownload() {
+            const el = document.getElementById("download");
+            el.disabled = false;
+        }
         function download() {
             importFix.downloadCSV()
+        }
+
+        function clearSheetNames() {
+            // const elRoot = document.getElementById("sheet-select");
+            // elRoot.innerHTML = '';
+            // TODO: Implement
         }
 
         function renderSheetNames(file, sheetNames) {
@@ -79,7 +122,7 @@
                 btn.innerHTML = sheetName;
                 elRoot.appendChild(btn);
                 btn.addEventListener("click", function () {
-                    importFix.readContentExcelSheet(file, sheetName, displayResults);
+                    importFix.readContentExcelSheet(file, sheetName, callbackGotResults);
                 });
             });
         }
@@ -87,19 +130,24 @@
         function handleSheetNames(file, sheetNames) {
             if (sheetNames) {
                 if (sheetNames.length === 1) {
-                    importFix.readContentExcelSheet(file, sheetNames[0], displayResults);
+                    importFix.readContentExcelSheet(file, sheetNames[0], callbackGotResults);
                 } else {
                     renderSheetNames(file, sheetNames);
                 }
             }
         }
 
-        function upload(files) {
+        function reset() {
             hideResults();
+            clearSheetNames();
+        }
+
+        function upload(files) {
+            reset();
             if (files.length === 1) {
                 const file = files[0];
                 if (importFix.fileIsCsv(file)) {
-                    importFix.readContentCSVFile(file, displayResults);
+                    importFix.readContentCSVFile(file, callbackGotResults);
                 } else if (importFix.fileIsExcel(file)) {
                     importFix.readSheetNames(file, handleSheetNames);
                 }
@@ -108,16 +156,6 @@
             } else {
                 importFix.warningLog("No file selected");
             }
-        }
-
-        function toggleHeader() {
-            const el = document.getElementById("toggle-header");
-            firstRowIsHeaders = !firstRowIsHeaders;
-            el.classList.remove("button-selected");
-            if (firstRowIsHeaders) {
-                el.classList.add("button-selected");
-            }
-            displayResults();
         }
 
         function toggleDisplay(ids) {
@@ -134,11 +172,97 @@
             });
         }
 
+        function toggleRadio(el, callbackFn) {
+            var wasChecked = (typeof el.dataset.waschecked === "string") ? (el.dataset.waschecked === "false" ? false : true) : el.dataset.waschecked;
+            var setChecked = !wasChecked;
+
+            el.checked = setChecked;
+            el.dataset.waschecked = setChecked;
+            callbackFn(setChecked);
+        }
+
+        function toggleHeaders(val) {
+            console.log("Toggle headers");
+            var elements = document.getElementsByClassName("header-row")
+            firstRowIsHeaders = !firstRowIsHeaders;
+
+            for (let i = 0; i < elements.length; i++) {
+                const el = elements[i];
+                if (firstRowIsHeaders) {
+                    el.style.display = "block";
+                } else {
+                    el.style.display = "none";
+                }
+            }
+        }
+
     </script>
 </head>
 
 <body>
-    <label for="file-upload" class="custom-file-upload">
+    <div class="part-top">
+        <div style="padding-left: 10%;">
+            <div><img style="height:40px;margin-top:10px;" src="assets/peltarion_logotype_horizontal_white.png"></div>
+        </div>
+
+    </div>
+    <div class="part-bottom">
+        <div class="new-section">
+            <div class="panel-upload">
+                <div class="icon">
+                    <img src="assets/icons_PA25_Upload2.svg" style="width:40px" />
+                </div>
+                <div class="text-upload">
+                    Choose a dataset you want to clean up or test
+                </div>
+                <div class="upload-button">
+                    <label for="file-upload" class="btn new-btn-primary">
+                        Upload CSV / Excel
+                    </label>
+                    <input id="file-upload" type="file" />
+                </div>
+            </div>
+            <div class="panel-spacing"></div>
+            <div id="info" class="panel-info">
+                info
+            </div>
+        </div>
+        <div class="new-section">
+            <div class="panel-headers">
+                <div class="controls">
+                    <input type="radio" id="is-header" checked onclick="toggleRadio(this, toggleHeaders)"
+                        data-waschecked="true">
+                    <label for="is-header">First row contain headers</label>
+                </div>
+                <div id="header-list" class="flex-table">
+                    <div class="flex-header">
+                        Headers
+                    </div>
+                </div>
+            </div>
+            <div class="panel-spacing">
+
+            </div>
+            <div class="panel-example-rows">
+                <div class="controls">
+                    <button class="btn new-btn-secondary-small" onclick="displayExampleRow(-1)">Back</button>
+                    <button class="btn new-btn-secondary-small" onclick="displayExampleRow(1)">Next</button>
+                    <button id="download" class="btn new-btn-primary" disabled style="float:right;"
+                        onclick="download()">Download
+                        file</button>
+                </div>
+                <div id="example-row-table" class="flex-table">
+                    <div id="example-row-header" class="flex-header">
+                        Example of removed row
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- <label for="file-upload" class="custom-file-upload">
         Upload CSV / Excel
     </label>
     <input id="file-upload" type="file" />
@@ -161,7 +285,7 @@
                 <div id="removed-row-example" style="display: none;"></div>
             </div>
         </div>
-        <button id="download" onclick="download()" class="button-download">Download</button>
+        <button id="download" onclick="download()" class="button-download">Download</button> -->
 
     </div>
     <script>
