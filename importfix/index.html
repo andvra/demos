@@ -71,6 +71,11 @@
             importFix.downloadCSV()
         }
 
+        function clearSheetNames() {
+            const elRoot = document.getElementById("sheet-select");
+            elRoot.innerHTML = '';
+        }
+
         function renderSheetNames(file, sheetNames) {
             const elRoot = document.getElementById("sheet-select");
             sheetNames.forEach(sheetName => {
@@ -94,8 +99,13 @@
             }
         }
 
-        function upload(files) {
+        function reset() {
             hideResults();
+            clearSheetNames();
+        }
+
+        function upload(files) {
+            reset();
             if (files.length === 1) {
                 const file = files[0];
                 if (importFix.fileIsCsv(file)) {
