@@ -73,6 +73,7 @@ input[type="file"] {
     padding: 11px 16px;
     border-radius: 4px;
     height: 40px;
+    margin-left: 15px;
 }
 
 .new-btn-secondary:hover {
@@ -116,6 +117,7 @@ input[type="file"] {
     position: absolute;
     top: 60px;
     left: 0;
+    padding-bottom: 50px;
 }
 
 .new-section {
@@ -188,6 +190,10 @@ input[type="file"] {
     width: 50%;
     padding-left: 10px;
     padding-right: 10px;
+    /* Cut long texts */
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .flex-col-full {
@@ -216,4 +222,33 @@ input[type="file"] {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.info-header {
+    font-weight: bold;
+    padding-left: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.info-rows {
+    font-size: 12px;
+    line-height: 25px;
+}
+
+.info-row {
+    border-bottom: 1px solid #dee4ea;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-col {
+    display: inline;
+}
+.info-col-right {
+    float: right;
 }

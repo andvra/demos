@@ -19,6 +19,10 @@
             const headers = importFix.uploadedData[0];
 
             const el = document.getElementById("header-list");
+            const oldHeaders = el.querySelectorAll(".header-row");
+            for (let i = oldHeaders.length - 1; i >= 0; i--) {
+                oldHeaders[i].remove();
+            }
             for (let i = 0; i < headers.length; i++) {
                 const row = document.createElement('div');
                 row.classList.add("flex-row");
@@ -70,19 +74,30 @@
                     row.appendChild(colKey);
                     row.appendChild(colValue);
                     el.appendChild(row);
-                    console.log(keys[i]);
                 }
             }
         }
 
         function displayInfo() {
-            const el = document.getElementById("info");
-            const infoStr = `&nbsp;&nbsp;Number of rows in original file: ${importFix.info.numRowsOriginal}<br/>&nbsp;&nbsp;Number of rows after clean: ${importFix.info.numRowsAfterClean}<br/>&nbsp;&nbsp;Number of empty rows: ${importFix.info.numRowsRemoved}<br/>&nbsp;&nbsp;Number of features: ${importFix.info.numFeatures}<br/>`;
-            el.innerHTML = infoStr;
+            const elNumFeatures = document.getElementById("info-num-features");
+            const elNumEmptyRows = document.getElementById("info-num-empty-rows");
+            const elNumRowsClean = document.getElementById("info-num-rows-clean");
+            const elNumRowsOriginal = document.getElementById("info-num-rows-original");
+
+            elNumFeatures.innerHTML = importFix.info.numFeatures;
+            elNumEmptyRows.innerHTML = importFix.info.numRowsRemoved;
+            elNumRowsOriginal.innerHTML = importFix.info.numRowsOriginal;
+            elNumRowsClean.innerHTML = importFix.info.numRowsAfterClean;
+
+        }
+
+        function displayDone() {
+            const el = document.getElementById("upload-icon-img");
+            el.src = "assets/icons_PA25_Check_2_green.svg";
         }
 
         function displayResults() {
-
+            displayDone();
             displayInfo();
             displayHeaders();
             displayExampleRow();
@@ -94,10 +109,8 @@
         }
 
         function hideResults() {
-            // const elInfo = document.getElementById("info");
-            // elInfo.style.display = "none";
-
-            // TODO: Implement
+            const elExampleRowHeader = document.getElementById("example-row-header");
+            elExampleRowHeader.innerHTML = "Example of removed row";
         }
 
         function enableDownload() {
@@ -109,16 +122,18 @@
         }
 
         function clearSheetNames() {
-            // const elRoot = document.getElementById("sheet-select");
-            // elRoot.innerHTML = '';
-            // TODO: Implement
+            const elRoot = document.getElementById("upload-buttons");
+            const asd = elRoot.querySelectorAll(".new-btn-secondary");
+            for (let i = asd.length - 1; i >= 0; i--) {
+                asd[i].remove();
+            }
         }
 
         function renderSheetNames(file, sheetNames) {
-            const elRoot = document.getElementById("sheet-select");
+            const elRoot = document.getElementById("upload-buttons");
             sheetNames.forEach(sheetName => {
                 const btn = document.createElement('button');
-                btn.classList.add("button-select");
+                btn.classList.add("new-btn-secondary");
                 btn.innerHTML = sheetName;
                 elRoot.appendChild(btn);
                 btn.addEventListener("click", function () {
@@ -210,12 +225,12 @@
         <div class="new-section">
             <div class="panel-upload">
                 <div class="icon">
-                    <img src="assets/icons_PA25_Upload2.svg" style="width:40px" />
+                    <img id="upload-icon-img" src="assets/icons_PA25_Upload2.svg" style="width:40px" />
                 </div>
                 <div class="text-upload">
                     Choose a dataset you want to clean up or test
                 </div>
-                <div class="upload-button">
+                <div id="upload-buttons" class="upload-button">
                     <label for="file-upload" class="btn new-btn-primary">
                         Upload CSV / Excel
                     </label>
@@ -224,7 +239,25 @@
             </div>
             <div class="panel-spacing"></div>
             <div id="info" class="panel-info">
-                info
+                <div class="info-header">Info:</div>
+                <div class="info-rows">
+                    <div class="info-row">
+                        <div class="info-col">Number of rows in original file</div>
+                        <div id="info-num-rows-original" class="info-col info-col-right">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-col">Number of rows after clean</div>
+                        <div id="info-num-rows-clean" class="info-col info-col-right">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-col">Number of empty rows</div>
+                        <div id="info-num-empty-rows" class="info-col info-col-right">-</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-col">Number of features</div>
+                        <div id="info-num-features" class="info-col info-col-right">-</div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="new-section">
@@ -258,35 +291,6 @@
                 </div>
             </div>
         </div>
-    </div>
-
-
-
-    <!-- <label for="file-upload" class="custom-file-upload">
-        Upload CSV / Excel
-    </label>
-    <input id="file-upload" type="file" />
-    <div id="sheet-select">
-
-    </div>
-    <div id="info" style="display: none;" class="section">
-        <div id="results">
-            <div id="overall-info"></div>
-            <div id="header-headers">
-                <h2 onclick="toggleDisplay(['headers','toggle-header']);">Headers</h2>
-                <button id="toggle-header" onclick="toggleHeader()" class="button button-selected"
-                    style="display: none;">
-                    First row is header
-                </button>
-                <div id="headers" style="display: none;"></div>
-            </div>
-            <div id="header-removed-row-example">
-                <h2 onclick="toggleDisplay('removed-row-example');">Removed row example</h2>
-                <div id="removed-row-example" style="display: none;"></div>
-            </div>
-        </div>
-        <button id="download" onclick="download()" class="button-download">Download</button> -->
-
     </div>
     <script>
         const inputElement = document.getElementById("file-upload");
