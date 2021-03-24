@@ -252,3 +252,56 @@ input[type="file"] {
 .info-col-right {
     float: right;
 }
+
+#error-message {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 10px;
+    height: 50px;
+    width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: salmon;
+    border-radius: 5px;
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+}
+
+.error-message-fade {
+    animation: fade 10s normal;
+}
+
+@keyframes fade {
+    0%,
+    100% {
+        opacity: 0;
+    }
+    5% {
+        opacity: 1;
+    }
+    95% {
+        opacity: 1;
+    }
+}
+
+#how-to-use {
+    width: 100%;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    bottom: 0;
+    padding-bottom: 50px;
+    background-color: black;
+    opacity: 0.8;
+}
+
+#how-to-use-contents {
+    margin-left: 10%;
+    margin-top: 10%;
+    width: 80%;
+    color: pink;
+}
