@@ -103,6 +103,17 @@
             displayExampleRow();
         }
 
+        function displayHelp() {
+            console.log("HELP");
+            const el = document.getElementById("how-to-use");
+            el.style.display = "block";
+        }
+
+        function hideHelp() {
+            const el = document.getElementById("how-to-use");
+            el.style.display = "none";
+        }
+
         function callbackGotResults() {
             displayResults();
             enableDownload();
@@ -152,7 +163,20 @@
             }
         }
 
+        function displayErrorMessage(msg) {
+            var el = document.getElementById("error-message");
+            el.removeAttribute("class");
+            el.classList.add("error-message-fade");
+            el.innerHTML = msg;
+        }
+
+        function hideErrorMessage() {
+            var el = document.getElementById("error-message");
+            el.removeAttribute("class");
+        }
+
         function reset() {
+            hideErrorMessage();
             hideResults();
             clearSheetNames();
         }
@@ -165,6 +189,8 @@
                     importFix.readContentCSVFile(file, callbackGotResults);
                 } else if (importFix.fileIsExcel(file)) {
                     importFix.readSheetNames(file, handleSheetNames);
+                } else {
+                    displayErrorMessage("Can't read file. Only CSV/XLS/XLSX files allowed")
                 }
             } else if (files.length > 1) {
                 importFix.warningLog("Multiple files selected");
@@ -216,10 +242,11 @@
 
 <body>
     <div class="part-top">
-        <div style="padding-left: 10%;">
-            <div><img style="height:40px;margin-top:10px;" src="assets/peltarion_logotype_horizontal_white.png"></div>
+        <div style="padding-left: 10%;padding-right: 10%;">
+            <div style="display:inline-block;"><img style="height:40px;margin-top:10px;"
+                    src="assets/peltarion_logotype_horizontal_white.png"></div>
+            <div style="margin-left:10%;float:right;margin-top:20px;" onclick="displayHelp()">How to use</div>
         </div>
-
     </div>
     <div class="part-bottom">
         <div class="new-section">
@@ -292,11 +319,23 @@
             </div>
         </div>
     </div>
+    <div id="error-message" onclick="hideErrorMessage()"></div>
+    <div id="how-to-use" onclick="hideHelp()" style="display:none;">
+        <div id="how-to-use-contents">
+            Hello. The purpose of this page is to convert an input file into a Peltarion-compatible CSV. It currently
+            accepts CSV and Excel files (XLS/XLSX).<br />It's simple to use. Just upload your file and press Download.
+            There are some data displayed on the screen.
+        </div>
+    </div>
     <script>
         const inputElement = document.getElementById("file-upload");
+        inputElement.addEventListener("click", handleClickFiles, false);
         inputElement.addEventListener("change", handleFiles, false);
         function handleFiles() {
             upload(this.files);
+        }
+        function handleClickFiles() {
+            reset();
         }
     </script>
 </body>
