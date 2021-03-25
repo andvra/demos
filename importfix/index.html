@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <link rel="icon" href="assets/peltarion_favicon_red.svg" sizes="any" type="image/svg+xml">
     <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet'>
     <script type="text/javascript" src="papaparse.min.js"></script>
     <script type="text/javascript" src="engine.js"></script>
@@ -104,8 +105,8 @@
         }
 
         function displayHelp() {
-            console.log("HELP");
             const el = document.getElementById("how-to-use");
+            el.classList.add("how-to-use-display");
             el.style.display = "block";
         }
 
@@ -165,9 +166,10 @@
 
         function displayErrorMessage(msg) {
             var el = document.getElementById("error-message");
+            var elText = document.getElementById("error-message-text");
             el.removeAttribute("class");
             el.classList.add("error-message-fade");
-            el.innerHTML = msg;
+            elText.innerHTML = msg;
         }
 
         function hideErrorMessage() {
@@ -319,12 +321,20 @@
             </div>
         </div>
     </div>
-    <div id="error-message" onclick="hideErrorMessage()"></div>
-    <div id="how-to-use" onclick="hideHelp()" style="display:none;">
+    <div id="error-message" onclick="hideErrorMessage()">
+        <div id="icon-alert"><img src="assets/icons_PA25_Warning-61_orange.svg" style="width:10px;float:right;" /></div>
+        <div id="error-message-text"></div>
+        <div id="error-message-close"><img src="assets/icons_PA25_Close.svg" style="width:10px;" /></div>
+    </div>
+    <div id=" how-to-use" onclick="hideHelp()" style="display:none;">
+        <div id="how-to-use-contents-close">
+            <img src="assets/icons_PA25_Close_white.svg" />
+        </div>
         <div id="how-to-use-contents">
-            Hello. The purpose of this page is to convert an input file into a Peltarion-compatible CSV. It currently
-            accepts CSV and Excel files (XLS/XLSX).<br />It's simple to use. Just upload your file and press Download.
-            There are some data displayed on the screen.
+            Hello.<br /><br />
+            The purpose of this page is to convert an input file into a Peltarion-compatible CSV. It accepts
+            CSV and Excel files (XLS/XLSX)<br /><br />
+            Just upload your file, check the results of the data processing and then press Download.
         </div>
     </div>
     <script>
