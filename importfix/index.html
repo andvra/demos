@@ -104,8 +104,8 @@
         }
 
         function displayHelp() {
-            console.log("HELP");
             const el = document.getElementById("how-to-use");
+            el.classList.add("how-to-use-display");
             el.style.display = "block";
         }
 
@@ -319,12 +319,18 @@
             </div>
         </div>
     </div>
-    <div id="error-message" onclick="hideErrorMessage()"></div>
+    <div id="error-message" onclick="hideErrorMessage()">
+
+    </div>
     <div id="how-to-use" onclick="hideHelp()" style="display:none;">
+        <div id="how-to-use-contents-close">
+            <img src="assets/icons_PA25_Close_white.svg" />
+        </div>
         <div id="how-to-use-contents">
-            Hello. The purpose of this page is to convert an input file into a Peltarion-compatible CSV. It currently
-            accepts CSV and Excel files (XLS/XLSX).<br />It's simple to use. Just upload your file and press Download.
-            There are some data displayed on the screen.
+            Hello.<br /><br />
+            The purpose of this page is to convert an input file into a Peltarion-compatible CSV. It accepts
+            CSV and Excel files (XLS/XLSX)<br /><br />
+            Just upload your file, check the results of the data processing and then press Download.
         </div>
     </div>
     <script>
