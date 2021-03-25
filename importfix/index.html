@@ -1,6 +1,7 @@
 <html>
 
 <head>
+    <link rel="icon" href="assets/peltarion_favicon_red.svg" sizes="any" type="image/svg+xml">
     <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet'>
     <script type="text/javascript" src="papaparse.min.js"></script>
     <script type="text/javascript" src="engine.js"></script>
@@ -165,9 +166,10 @@
 
         function displayErrorMessage(msg) {
             var el = document.getElementById("error-message");
+            var elText = document.getElementById("error-message-text");
             el.removeAttribute("class");
             el.classList.add("error-message-fade");
-            el.innerHTML = msg;
+            elText.innerHTML = msg;
         }
 
         function hideErrorMessage() {
@@ -320,9 +322,11 @@
         </div>
     </div>
     <div id="error-message" onclick="hideErrorMessage()">
-
+        <div id="icon-alert"><img src="assets/icons_PA25_Warning-61_orange.svg" style="width:10px;float:right;" /></div>
+        <div id="error-message-text"></div>
+        <div id="error-message-close"><img src="assets/icons_PA25_Close.svg" style="width:10px;" /></div>
     </div>
-    <div id="how-to-use" onclick="hideHelp()" style="display:none;">
+    <div id=" how-to-use" onclick="hideHelp()" style="display:none;">
         <div id="how-to-use-contents-close">
             <img src="assets/icons_PA25_Close_white.svg" />
         </div>
